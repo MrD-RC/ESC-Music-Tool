@@ -6,6 +6,14 @@ def firstInteger?(x)
     x[/\d+/]
 end
 
+def titleize?(str)
+    str.split(/ |\_/).map(&:capitalize).join(" ")
+  end
+
+def findBPM?(blhNoteLength)
+    145*blhNoteLength**3/-192+1895*blhNoteLength**2/64-77075*blhNoteLength/192+138125/64
+end
+
 notes = []
 outputFirmware = "BLHeli32"
 
@@ -14,8 +22,19 @@ toBluejay = if gets.chomp.upcase == 'Y' then true else false end
 
 if toBluejay
     outputFirmware = "Bluejay"
+    octaveCalc = [];
+    
+    print "Enter the name of the tune: "
+    tuneName = titleize?(gets.chomp).delete(' ')
+    print "Enter the note length: "
+    noteLength = gets.chomp.to_i
+    if noteLength == nil then noteLength = 8 end
+    print "Enter the note interval: "
+    noteInterval = gets.chomp.to_i
+    if noteInterval == nil then noteInterval = 0 end
+    
     puts "Enter the BLHeli32 Music notation"
-    notation = gets.chomp
+    notation = gets.chomp.downcase
 
     note = ""
     notation.each_char do |i|
@@ -32,30 +51,47 @@ if toBluejay
 
     notation = ""
     notes.each do |i|
-        if i[0] == "P"
-            notation = notation[0..-2] 
-            notation += ".,"
-        else
-            fi = firstInteger?(i)
-            unless fi == nil
-                idx = i.index(fi)
-                note = i[(idx+1)..-1].delete(' ')
-                case note
+        fi = firstInteger?(i)
+        unless fi == nil
+            idx = i.index(fi)
+            note = i[(idx+1)..-1].delete(' ')
+            case note
+                when "1/1"
+                    note = 1
                 when "1/2"
-                    note = "2"
+                    note = 2
                 when "1/4"
-                    note = "4"
+                    note = 4
                 when "1/8"
                     note = 8
                 when "1/16"
                     note = 16
-                end
+                when "1/32"
+                    note = 32
+                when "1/64"
+                    note = 64
+                when "1/128"
+                    note = 128
+                else
+                    note = note.to_i
+            end
 
-                notation += note + i[0..idx] + ","
+            if i[0] == "p"
+                if note > 0 && note < noteLength then
+                    pause = noteLength / note
+                    notation += pause.to_s
+                end
+                notation += "p,"
+            else
+                octaveCalc.append(i[(idx),1].to_i)
+                notation += note.to_s + i[0..idx] + ","
             end
         end
     end
+    avgOctave = (octaveCalc.sum(0.0) / octaveCalc.size).round()
     notation = notation[0..-2]
+
+    notation = "#{tuneName}:o=#{avgOctave},d=#{noteLength},b=#{findBPM?(noteLength)}:#{notation}"
 else
     puts "Enter the BlueJay Music notation"
     notation = gets.chomp
