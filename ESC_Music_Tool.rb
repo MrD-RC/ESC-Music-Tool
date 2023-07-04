@@ -36,10 +36,10 @@ if toBluejay
     
     print "Enter the name of the tune: "
     tuneName = titleize?(gets.chomp).delete(' ')
-    print "Enter the note length: "
+    print "Enter the Gen. Length: "
     noteLength = gets.chomp.to_i
     if noteLength == nil then noteLength = 8 end
-    print "Enter the note interval: "
+    print "Enter the Gen. Interval: "
     noteInterval = gets.chomp.to_i
     if noteInterval == nil then noteInterval = 0 end
 
