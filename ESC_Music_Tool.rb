@@ -14,6 +14,16 @@ def findBPM?(blhNoteLength)
     145*blhNoteLength**3/-192+1895*blhNoteLength**2/64-77075*blhNoteLength/192+138125/64
 end
 
+def nearest?(a,x)
+    tmp = a.sort
+    tmp << x
+    tmp.sort!
+    idx = tmp.index x
+    tst1 = x - tmp[idx-1]
+    tst2 = tmp[idx+1] - x
+    if tst1 < tst2 then tmp[idx-1] else tmp[idx+1] end
+end
+
 notes = []
 outputFirmware = "BLHeli32"
 
@@ -32,6 +42,13 @@ if toBluejay
     print "Enter the note interval: "
     noteInterval = gets.chomp.to_i
     if noteInterval == nil then noteInterval = 0 end
+
+    if noteInterval > 0 then
+        noteInterval = 17 - noteInterval
+        noteInterval = nearest?([1,2,4,8,16],noteInterval)
+
+        puts "Interval: #{noteInterval}"
+    end
     
     puts "Enter the BLHeli32 Music notation"
     notation = gets.chomp.downcase
@@ -85,6 +102,10 @@ if toBluejay
             else
                 octaveCalc.append(i[(idx),1].to_i)
                 notation += note.to_s + i[0..idx] + ","
+            end
+
+            if noteInterval > 0 then
+                notation+= "#{noteInterval}p,"
             end
         end
     end
